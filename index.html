@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Six conversation-research principles for designing voice agents, with before/after example calls.">
+<title>Six Principles of Voice Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~42rem) with example calls breaking wider; each principle reads statement → rules → before/after calls → build notes. */
+:root {
+  --bg: #F5F6F8; --surface: #FFFFFF; --ink: #17212C; --muted: #5A6573; --line: #DCE1E7;
+  --accent: #2D55B8; --poor: #B2452F; --good: #2C7A57; --keys: #7A5BB0;
+  --poor-soft: #F7E9E5; --good-soft: #E5F2EB; --keys-soft: #EEE8F6; --accent-soft: #E6ECF8;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F1419; --surface: #171E26; --ink: #E5EAF0; --muted: #98A3B0; --line: #29333E;
+  --accent: #86A6EE; --poor: #E58A73; --good: #6FC79D; --keys: #B79BE6;
+  --poor-soft: #2C1D1A; --good-soft: #17291F; --keys-soft: #241D31; --accent-soft: #1B2436; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F1419; --surface: #171E26; --ink: #E5EAF0; --muted: #98A3B0; --line: #29333E;
+  --accent: #86A6EE; --poor: #E58A73; --good: #6FC79D; --keys: #B79BE6;
+  --poor-soft: #2C1D1A; --good-soft: #17291F; --keys-soft: #241D31; --accent-soft: #1B2436; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 400 1.0625rem/1.65 var(--body); }
+.wrap { max-width: 60rem; margin: 0 auto; padding-block: 2.5rem 4rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.col { max-width: 42rem; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.05; font-weight: 700; }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.15; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 500; }
+p { margin: 0; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.eyebrow, .tag, .layer, .ts, .who, .time, .tn { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.eyebrow { color: var(--accent); }
+
+/* Hero */
+.hero { display: grid; gap: 1.1rem; padding-bottom: 2rem; border-bottom: 1px solid var(--line); }
+.hero .deck { font-size: 1.2rem; color: var(--muted); max-width: 38rem; }
+.listen { display: flex; gap: .6rem; align-items: center; font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+.listen .dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--good); flex: none; }
+
+.intro { display: grid; gap: 1rem; padding-block: 2rem; }
+.toc { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .25rem 1.5rem; }
+.toc a { display: flex; gap: .7rem; align-items: baseline; padding: .4rem 0; color: var(--ink); text-decoration: none; font-family: var(--display); font-weight: 500; border-bottom: 1px solid var(--line); }
+.toc a:hover { color: var(--accent); }
+.tn { color: var(--accent); min-width: 1.2rem; }
+
+.layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; margin-top: .5rem; }
+.lay { display: grid; gap: .45rem; align-content: start; padding: 1rem 1.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.lay p { font-size: .95rem; color: var(--muted); }
+.layer { display: inline-block; justify-self: start; padding: .15rem .5rem; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+
+.block { display: grid; gap: 1rem; padding-block: 2.5rem; border-top: 1px solid var(--line); }
+.block ul { margin: 0; padding-left: 1.2rem; display: grid; gap: .4rem; }
+
+/* Principles */
+.principle { display: grid; gap: 1rem; padding-block: 3rem; border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
+.principle > p, .principle > h3, .principle > ul, .p-head { max-width: 42rem; }
+.p-head { display: grid; gap: .35rem; }
+.lede { font-size: 1.18rem; }
+.principle > h3 { margin-top: .5rem; color: var(--muted); }
+.rules { margin: 0; padding: 0; list-style: none; display: grid; gap: .45rem; }
+.rules li { position: relative; padding-left: 1.3rem; }
+.rules li::before { content: ""; position: absolute; left: 0; top: .72em; width: .55rem; height: 2px; background: var(--accent); }
+
+.examples { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); margin-top: .75rem; }
+.call { margin: 0; display: grid; gap: .8rem; align-content: start; padding: 1rem 1.1rem 1.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.call { --c: var(--good); --cs: var(--good-soft); }
+.call.poor { --c: var(--poor); --cs: var(--poor-soft); }
+.call.keypad { --c: var(--keys); --cs: var(--keys-soft); }
+.call-h { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.tag { padding: .15rem .5rem; border-radius: 4px; background: var(--cs); color: var(--c); font-weight: 500; }
+.scn { font-family: var(--display); font-weight: 500; font-size: .95rem; }
+.call figcaption { font-size: .95rem; color: var(--muted); }
+
+.player { display: flex; align-items: center; gap: .75rem; }
+.play { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 0; background: var(--c); cursor: pointer; display: grid; place-items: center; }
+.play .ico { width: 0; height: 0; border-style: solid; border-width: .45rem 0 .45rem .72rem; border-color: transparent transparent transparent var(--surface); margin-left: .15rem; }
+.play.on .ico { width: .7rem; height: .8rem; border: 0; margin: 0; border-left: .22rem solid var(--surface); border-right: .22rem solid var(--surface); }
+.wave { flex: 1; min-width: 0; height: 2.4rem; display: flex; align-items: center; gap: 2px; cursor: pointer; }
+.wave i { flex: 1; min-width: 1px; height: calc(var(--h) * 100%); background: var(--line); border-radius: 1px; }
+.wave i.done { background: var(--c); }
+.time { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 2.6rem; text-align: right; }
+
+.script { list-style: none; margin: 0; padding: .75rem 0 0; border-top: 1px dashed var(--line); display: grid; gap: .45rem; font-size: .95rem; }
+.ln { display: grid; grid-template-columns: 2.4rem 3.6rem 1fr; gap: .5rem; align-items: baseline; }
+.ln .ts { color: var(--muted); font-variant-numeric: tabular-nums; }
+.ln .who { color: var(--muted); }
+.ln.agent .who { color: var(--c); }
+.ln.pause .tx, .ln.cue .tx, .ln.keys .tx { font-style: italic; color: var(--muted); }
+.ln .tx { min-width: 0; }
+.ln.now .tx { background: var(--cs); border-radius: 3px; box-shadow: 0 0 0 3px var(--cs); }
+
+.build { max-width: 42rem; display: grid; gap: .6rem; margin-top: .75rem; padding: 1rem 1.1rem; border: 1px solid var(--line); border-radius: 10px; }
+.build ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.build li { display: grid; grid-template-columns: 4.8rem 1fr; gap: .75rem; align-items: baseline; font-size: .97rem; }
+.build li .layer { justify-self: start; }
+
+footer { border-top: 1px solid var(--line); padding-top: 2rem; display: grid; gap: .8rem; font-size: .9rem; color: var(--muted); max-width: 42rem; }
+footer ul { margin: 0; padding-left: 1.2rem; display: grid; gap: .3rem; }
+
+@media (max-width: 480px) {
+  .ln { grid-template-columns: 3.4rem 1fr; }
+  .ln .ts { display: none; }
+  .build li { grid-template-columns: 1fr; gap: .25rem; }
+}
+@media (prefers-reduced-motion: no-preference) { .wave i { transition: background-color .15s; } }
+</style>
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<main class="wrap">
+  <header class="hero">
+    <span class="eyebrow">Voice AI design guide</span>
+    <h1>Six principles of voice design</h1>
+    <p class="deck">Designing for the ear is different from designing for the screen. These six principles come from conversation research and translate directly into how a voice agent should talk, listen and recover.</p>
+    <p class="listen"><span class="dot" aria-hidden="true"></span>13 example calls, each with a transcript. Headphones help.</p>
+  </header>
+
+  <section class="intro">
+    <div class="col" style="display:grid;gap:1rem">
+      <p>For years, voice bots were held back by the technology: shaky language understanding, no memory between turns, and conversations that fell apart after one or two exchanges. Large language models have fixed most of that. The bottleneck now is design.</p>
+      <p>Voice is less forgiving than chat. Callers notice every pause, every mispronounced name and every awkward hesitation. There are no buttons, links, forms or visual hierarchy to lean on, only words heard once in order. The principles below draw on conversation analysis, the study of how people actually organise talk, rather than on persona or tone alone.</p>
+    </div>
+    <ol class="toc"><li><a href="#latency"><span class="tn">1</span>Manage how long the wait feels</a></li><li><a href="#turns"><span class="tn">2</span>Design for turn-taking</a></li><li><a href="#composition"><span class="tn">3</span>Put the question last</a></li><li><a href="#memory"><span class="tn">4</span>Go easy on working memory</a></li><li><a href="#repair"><span class="tn">5</span>Repair in steps</a></li><li><a href="#multimodal"><span class="tn">6</span>Switch channels when voice isn&#x27;t the best tool</a></li></ol>
+  </section>
+
+  <section class="block">
+    <div class="col" style="display:grid;gap:.6rem">
+      <span class="eyebrow">Where design lives</span>
+      <h2>Three layers of a voice agent</h2>
+      <p>Each principle shows up in one or more of these layers. The "How to build it" notes under each principle are tagged with the layer they belong to.</p>
+    </div>
+    <div class="layers"><div class="lay"><span class="layer l-prompt">Prompt</span><h3>Prompt instructions</h3><p>Concrete rules for how each turn is built: what goes first, where the question goes, how long a turn can be. Specific rules work far better than tone words like &quot;friendly&quot;.</p></div><div class="lay"><span class="layer l-logic">Logic</span><h3>Conversation logic and state</h3><p>Variables, slot-filling, retry counters and confirmations that run outside the model&#x27;s reasoning, so they behave the same way every time.</p></div><div class="lay"><span class="layer l-channel">Channel</span><h3>Voice channel settings</h3><p>Voice choice, speech speed, wait cues, barge-in, recognition hints and call routing. These shape how the agent sounds and how quickly it responds.</p></div></div>
+  </section>
+
+  <section class="block">
+    <div class="col" style="display:grid;gap:1rem">
+      <span class="eyebrow">Before you start</span>
+      <h2>Choosing a voice</h2>
+      <p>Pick the voice against a written persona spec, not by scrolling a voice library until something sounds nice. Voices and speech models change quickly, so write down what you need (language, accent, pacing, warmth, how it handles your domain terms) and test candidates against that.</p>
+      <ul>
+        <li>Test pronunciation of your real vocabulary: product names, place names, currency amounts, account and order formats.</li>
+        <li>Tune speaking speed and stability on real scripts. Small changes are very audible on the phone.</li>
+        <li>Set the wait-cue trigger low, around 500 ms, so callers are never left in silence.</li>
+        <li>Check which delivery controls your chosen model supports, since not every model exposes the same settings.</li>
+      </ul>
+    </div>
+  </section>
+
+  
+<section class="principle" id="latency">
+  <div class="p-head"><span class="eyebrow">Principle 1</span><h2>Manage how long the wait feels</h2></div>
+  <p class="lede">On a call, silence is a signal. After about half a second to a second of dead air, callers start to wonder if the line dropped. A typical speech-to-text, model, text-to-speech pipeline can add a second or more before any backend lookup even starts.</p>
+  <p>You often can&#x27;t remove the delay, but you can change how it feels. Say something before the wait starts, fill longer waits with a soft audio cue, and give a progress update if a lookup runs long. When the wait is predictable, tell the caller roughly how long it will take.</p>
+  <h3>In practice</h3>
+  <ul class="rules"><li>Acknowledge the request before calling any slow system: &quot;Sure, let me pull that up.&quot;</li><li>Play a soft, non-verbal cue during waits longer than about a second.</li><li>For lookups over a few seconds, give a short progress update instead of more silence.</li><li>Write filler lines in the agent&#x27;s own voice. A formal banking agent and a casual food-delivery agent shouldn&#x27;t sound the same while they wait.</li></ul>
+  <div class="examples n2">
+<figure class="call poor" id="p1_poor">
+  <header class="call-h"><span class="tag">Before</span><span class="scn">Order status, 4-second lookup</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: Before, Order status, 4-second lookup"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="12.8" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.15"></i><i style="--h:0.95"></i><i style="--h:0.17"></i><i style="--h:0.09"></i><i style="--h:0.23"></i><i style="--h:0.12"></i><i style="--h:0.18"></i><i style="--h:0.22"></i><i style="--h:0.38"></i><i style="--h:0.24"></i><i style="--h:0.16"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.28"></i><i style="--h:0.2"></i><i style="--h:0.66"></i><i style="--h:0.13"></i><i style="--h:0.53"></i><i style="--h:0.15"></i><i style="--h:0.49"></i><i style="--h:0.19"></i><i style="--h:0.33"></i><i style="--h:0.11"></i><i style="--h:0.36"></i><i style="--h:0.25"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.37"></i><i style="--h:1.0"></i><i style="--h:0.54"></i><i style="--h:0.68"></i><i style="--h:0.72"></i><i style="--h:0.54"></i><i style="--h:0.61"></i><i style="--h:0.27"></i><i style="--h:0.36"></i><i style="--h:0.29"></i><i style="--h:0.19"></i><i style="--h:0.06"></i><i style="--h:0.93"></i><i style="--h:0.63"></i><i style="--h:0.42"></i><i style="--h:0.11"></i><i style="--h:0.42"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:13</span>
+    <audio preload="metadata" src="audio/p1_poor.mp3"></audio>
+  </div>
+  <figcaption>The caller hears four seconds of nothing, asks if anyone&#x27;s there, and talks over the answer when it finally arrives.</figcaption>
+  <ol class="script"><li class="ln caller"><span class="ts">0:00</span><span class="who">Caller</span><span class="tx">Hi, can you tell me where my order is? It&#x27;s order 4417.</span></li><li class="ln pause"><span class="ts"></span><span class="who">Silence</span><span class="tx">4 seconds of silence</span></li><li class="ln caller"><span class="ts">0:09</span><span class="who">Caller</span><span class="tx">Hello? Are you still there?</span></li><li class="ln agent"><span class="ts">0:10</span><span class="who">Agent</span><span class="tx">Your order is out for delivery and should arrive...</span></li><li class="ln caller"><span class="ts">0:11</span><span class="who">Caller</span><span class="tx">Sorry, what was that?</span></li></ol>
+</figure>
+<figure class="call good" id="p1_good">
+  <header class="call-h"><span class="tag">After</span><span class="scn">Order status, 4-second lookup</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: After, Order status, 4-second lookup"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="18.0" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:1.0"></i><i style="--h:0.12"></i><i style="--h:0.24"></i><i style="--h:0.2"></i><i style="--h:0.24"></i><i style="--h:0.44"></i><i style="--h:0.22"></i><i style="--h:0.08"></i><i style="--h:0.06"></i><i style="--h:0.26"></i><i style="--h:0.48"></i><i style="--h:0.55"></i><i style="--h:0.56"></i><i style="--h:0.41"></i><i style="--h:0.37"></i><i style="--h:0.36"></i><i style="--h:0.27"></i><i style="--h:0.36"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.72"></i><i style="--h:0.53"></i><i style="--h:0.6"></i><i style="--h:0.64"></i><i style="--h:0.3"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.36"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.26"></i><i style="--h:0.26"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.34"></i><i style="--h:0.13"></i><i style="--h:0.06"></i><i style="--h:0.25"></i><i style="--h:0.27"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.56"></i><i style="--h:0.59"></i><i style="--h:0.32"></i><i style="--h:0.74"></i><i style="--h:0.65"></i><i style="--h:0.4"></i><i style="--h:0.58"></i><i style="--h:0.35"></i><i style="--h:0.79"></i><i style="--h:0.64"></i><i style="--h:0.69"></i><i style="--h:0.56"></i><i style="--h:0.75"></i><i style="--h:0.37"></i><i style="--h:0.48"></i><i style="--h:0.13"></i><i style="--h:0.06"></i><i style="--h:0.38"></i><i style="--h:0.57"></i><i style="--h:0.58"></i><i style="--h:0.56"></i><i style="--h:0.6"></i><i style="--h:0.74"></i><i style="--h:0.5"></i><i style="--h:0.28"></i><i style="--h:0.37"></i><i style="--h:0.31"></i><i style="--h:0.07"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:18</span>
+    <audio preload="metadata" src="audio/p1_good.mp3"></audio>
+  </div>
+  <figcaption>The agent acknowledges first, a soft tone covers the lookup, and the answer lands cleanly.</figcaption>
+  <ol class="script"><li class="ln caller"><span class="ts">0:00</span><span class="who">Caller</span><span class="tx">Hi, can you tell me where my order is? It&#x27;s order 4417.</span></li><li class="ln agent"><span class="ts">0:05</span><span class="who">Agent</span><span class="tx">Sure, let me pull that up.</span></li><li class="ln cue"><span class="ts"></span><span class="who">Tone</span><span class="tx">Soft progress tone while the lookup runs</span></li><li class="ln agent"><span class="ts">0:11</span><span class="who">Agent</span><span class="tx">Okay. Order 4417 is out for delivery. It should reach you between four and six this evening.</span></li></ol>
+</figure></div>
+  <div class="build"><h3>How to build it</h3><ul><li><span class="layer l-prompt">Prompt</span><span>Instruct the agent to acknowledge every request that triggers a lookup before it calls the tool.</span></li><li><span class="layer l-logic">Logic</span><span>Mark slow actions so the platform plays a progress message or cue while they run. Check the default, since many platforms leave it off.</span></li><li><span class="layer l-channel">Channel</span><span>Set the wait-cue trigger to around 500 ms. Defaults of several seconds leave callers in silence far too long.</span></li></ul></div>
+</section>
+<section class="principle" id="turns">
+  <div class="p-head"><span class="eyebrow">Principle 2</span><h2>Design for turn-taking</h2></div>
+  <p class="lede">People don&#x27;t wait for silence to know it&#x27;s their turn. They predict where a turn will end from grammar, intonation and context, and they come in at those points. Conversation analysts call them transition-relevance places.</p>
+  <p>A voice agent needs clear places where the caller can take over, and it needs to give way when they do. A caller who interrupts isn&#x27;t breaking the system. Usually they&#x27;ve heard enough and know what they want.</p>
+  <h3>In practice</h3>
+  <ul class="rules"><li>Keep agent turns to one or two short sentences so there&#x27;s a natural point to respond.</li><li>When the caller barges in, stop speaking immediately.</li><li>Treat what the caller said during the interruption as their new turn, and answer it.</li><li>Don&#x27;t restart the interrupted list or prompt from the top.</li></ul>
+  <div class="examples n2">
+<figure class="call poor" id="p2_poor">
+  <header class="call-h"><span class="tag">Before</span><span class="scn">Flight options</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: Before, Flight options"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="21.1" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.3"></i><i style="--h:0.61"></i><i style="--h:0.36"></i><i style="--h:0.36"></i><i style="--h:0.43"></i><i style="--h:0.41"></i><i style="--h:0.29"></i><i style="--h:0.12"></i><i style="--h:0.06"></i><i style="--h:0.25"></i><i style="--h:0.52"></i><i style="--h:0.4"></i><i style="--h:0.34"></i><i style="--h:0.17"></i><i style="--h:0.38"></i><i style="--h:0.58"></i><i style="--h:0.38"></i><i style="--h:0.17"></i><i style="--h:0.5"></i><i style="--h:0.49"></i><i style="--h:0.38"></i><i style="--h:0.41"></i><i style="--h:0.36"></i><i style="--h:0.1"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:1.0"></i><i style="--h:0.71"></i><i style="--h:0.73"></i><i style="--h:0.7"></i><i style="--h:0.88"></i><i style="--h:0.48"></i><i style="--h:0.56"></i><i style="--h:0.42"></i><i style="--h:0.25"></i><i style="--h:0.45"></i><i style="--h:0.46"></i><i style="--h:0.46"></i><i style="--h:0.43"></i><i style="--h:0.36"></i><i style="--h:0.19"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.64"></i><i style="--h:0.57"></i><i style="--h:0.5"></i><i style="--h:0.23"></i><i style="--h:0.41"></i><i style="--h:0.06"></i><i style="--h:0.6"></i><i style="--h:0.41"></i><i style="--h:0.36"></i><i style="--h:0.24"></i><i style="--h:0.29"></i><i style="--h:0.48"></i><i style="--h:0.32"></i><i style="--h:0.39"></i><i style="--h:0.33"></i><i style="--h:0.08"></i><i style="--h:0.06"></i><i style="--h:0.31"></i><i style="--h:0.45"></i><i style="--h:0.24"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.96"></i><i style="--h:0.51"></i><i style="--h:0.43"></i><i style="--h:0.67"></i><i style="--h:0.17"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:21</span>
+    <audio preload="metadata" src="audio/p2_poor.mp3"></audio>
+  </div>
+  <figcaption>The caller asks for the cheapest flight mid-list. The agent keeps reading all three options and then asks which one they want.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">I found three flights to Mumbai tomorrow. The first leaves at 6:10 AM for 4,200 rupees. The second leaves at 9:45 AM for 5,100 rupees. And the third leaves at 2:30 PM for 6,300 rupees. Which one would you like?</span></li><li class="ln caller"><span class="ts">0:08</span><span class="who">Caller</span><span class="tx">Just the cheapest one is fine.</span></li><li class="ln caller"><span class="ts">0:19</span><span class="who">Caller</span><span class="tx">I said the cheapest one.</span></li></ol>
+</figure>
+<figure class="call good" id="p2_good">
+  <header class="call-h"><span class="tag">After</span><span class="scn">Flight options</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: After, Flight options"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="19.9" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.4"></i><i style="--h:0.65"></i><i style="--h:0.39"></i><i style="--h:0.41"></i><i style="--h:0.36"></i><i style="--h:0.48"></i><i style="--h:0.39"></i><i style="--h:0.24"></i><i style="--h:0.07"></i><i style="--h:0.06"></i><i style="--h:0.59"></i><i style="--h:0.37"></i><i style="--h:0.52"></i><i style="--h:0.23"></i><i style="--h:0.25"></i><i style="--h:0.53"></i><i style="--h:0.52"></i><i style="--h:0.32"></i><i style="--h:0.37"></i><i style="--h:0.53"></i><i style="--h:0.5"></i><i style="--h:0.37"></i><i style="--h:0.4"></i><i style="--h:0.35"></i><i style="--h:0.07"></i><i style="--h:0.06"></i><i style="--h:0.24"></i><i style="--h:0.57"></i><i style="--h:1.0"></i><i style="--h:0.37"></i><i style="--h:0.68"></i><i style="--h:0.45"></i><i style="--h:0.75"></i><i style="--h:0.15"></i><i style="--h:0.06"></i><i style="--h:0.64"></i><i style="--h:0.26"></i><i style="--h:0.36"></i><i style="--h:0.34"></i><i style="--h:0.29"></i><i style="--h:0.2"></i><i style="--h:0.37"></i><i style="--h:0.41"></i><i style="--h:0.6"></i><i style="--h:0.35"></i><i style="--h:0.18"></i><i style="--h:0.29"></i><i style="--h:0.53"></i><i style="--h:0.56"></i><i style="--h:0.39"></i><i style="--h:0.42"></i><i style="--h:0.37"></i><i style="--h:0.12"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.68"></i><i style="--h:0.48"></i><i style="--h:0.2"></i><i style="--h:0.06"></i><i style="--h:0.66"></i><i style="--h:0.69"></i><i style="--h:0.44"></i><i style="--h:0.38"></i><i style="--h:0.17"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.9"></i><i style="--h:0.54"></i><i style="--h:0.49"></i><i style="--h:0.11"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:20</span>
+    <audio preload="metadata" src="audio/p2_good.mp3"></audio>
+  </div>
+  <figcaption>The agent stops, picks the cheapest flight, and offers to book it or read out the rest.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">I found three flights to Mumbai tomorrow. The first leaves at 6:10 AM for 4,200 rupees. The second leaves at...</span></li><li class="ln caller"><span class="ts">0:08</span><span class="who">Caller</span><span class="tx">Just the cheapest one is fine.</span></li><li class="ln agent"><span class="ts">0:10</span><span class="who">Agent</span><span class="tx">Sure. The cheapest is the 6:10 AM flight at 4,200 rupees. Should I book it, or do you want to hear the other two?</span></li><li class="ln caller"><span class="ts">0:18</span><span class="who">Caller</span><span class="tx">Book it, please.</span></li></ol>
+</figure></div>
+  <div class="build"><h3>How to build it</h3><ul><li><span class="layer l-prompt">Prompt</span><span>Tell the agent that an interruption replaces its current turn: stop, respond to what the caller said, and don&#x27;t repeat what was cut off.</span></li><li><span class="layer l-prompt">Prompt</span><span>Limit spoken turns to one or two short sentences.</span></li><li><span class="layer l-channel">Channel</span><span>Keep barge-in on. Leave end-of-speech detection at its default unless testing shows callers are being cut off.</span></li></ul></div>
+</section>
+<section class="principle" id="composition">
+  <div class="p-head"><span class="eyebrow">Principle 3</span><h2>Put the question last</h2></div>
+  <p class="lede">In spoken English, new information usually comes at the end of a sentence, and listeners respond to the last thing they heard. If the question comes first and more detail follows, callers answer the detail.</p>
+  <p>Order each turn so context comes first, caveats come before the thing they qualify, and the question comes at the very end. When this clashes with a style rule, like &quot;be concise&quot; or &quot;lead with the answer&quot;, information order wins. Ask for one thing per turn.</p>
+  <h3>In practice</h3>
+  <ul class="rules"><li>End the turn with the question. Nothing should follow it.</li><li>Give context and conditions before the offer, not after.</li><li>State caveats before the option they apply to.</li><li>Ask for one action per turn.</li></ul>
+  <div class="examples n2">
+<figure class="call poor" id="p3_poor">
+  <header class="call-h"><span class="tag">Before</span><span class="scn">Rescheduling a doctor&#x27;s appointment</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: Before, Rescheduling a doctor&#x27;s appointment"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="9.9" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.24"></i><i style="--h:0.54"></i><i style="--h:0.53"></i><i style="--h:0.63"></i><i style="--h:0.37"></i><i style="--h:0.17"></i><i style="--h:0.15"></i><i style="--h:0.42"></i><i style="--h:0.23"></i><i style="--h:0.26"></i><i style="--h:0.22"></i><i style="--h:0.11"></i><i style="--h:0.21"></i><i style="--h:0.3"></i><i style="--h:0.19"></i><i style="--h:0.27"></i><i style="--h:0.12"></i><i style="--h:0.1"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.41"></i><i style="--h:0.55"></i><i style="--h:0.51"></i><i style="--h:0.21"></i><i style="--h:0.3"></i><i style="--h:0.23"></i><i style="--h:0.06"></i><i style="--h:0.27"></i><i style="--h:0.14"></i><i style="--h:0.16"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.4"></i><i style="--h:0.59"></i><i style="--h:0.3"></i><i style="--h:0.32"></i><i style="--h:0.45"></i><i style="--h:0.43"></i><i style="--h:0.3"></i><i style="--h:0.31"></i><i style="--h:0.34"></i><i style="--h:0.23"></i><i style="--h:0.2"></i><i style="--h:0.19"></i><i style="--h:0.15"></i><i style="--h:0.3"></i><i style="--h:0.19"></i><i style="--h:0.2"></i><i style="--h:0.19"></i><i style="--h:0.07"></i><i style="--h:0.11"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:1.0"></i><i style="--h:0.81"></i><i style="--h:0.73"></i><i style="--h:0.57"></i><i style="--h:0.53"></i><i style="--h:0.28"></i><i style="--h:0.51"></i><i style="--h:0.09"></i><i style="--h:0.34"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:10</span>
+    <audio preload="metadata" src="audio/p3_poor.mp3"></audio>
+  </div>
+  <figcaption>The question comes first. The caller replies to the last thing they heard, about next week, and the Thursday offer is lost.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">Do you want to move it to Thursday at 3 PM? There&#x27;s no fee to reschedule, and Dr. Rao also has a few slots next week.</span></li><li class="ln caller"><span class="ts">0:08</span><span class="who">Caller</span><span class="tx">Oh, what times next week?</span></li></ol>
+</figure>
+<figure class="call good" id="p3_good">
+  <header class="call-h"><span class="tag">After</span><span class="scn">Rescheduling a doctor&#x27;s appointment</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: After, Rescheduling a doctor&#x27;s appointment"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="9.6" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.46"></i><i style="--h:0.36"></i><i style="--h:0.36"></i><i style="--h:0.5"></i><i style="--h:0.51"></i><i style="--h:0.27"></i><i style="--h:0.36"></i><i style="--h:0.23"></i><i style="--h:0.48"></i><i style="--h:0.42"></i><i style="--h:0.49"></i><i style="--h:0.24"></i><i style="--h:0.21"></i><i style="--h:0.25"></i><i style="--h:0.21"></i><i style="--h:0.22"></i><i style="--h:0.25"></i><i style="--h:0.06"></i><i style="--h:0.36"></i><i style="--h:0.23"></i><i style="--h:0.3"></i><i style="--h:0.25"></i><i style="--h:0.26"></i><i style="--h:0.15"></i><i style="--h:0.06"></i><i style="--h:0.25"></i><i style="--h:0.67"></i><i style="--h:0.45"></i><i style="--h:0.62"></i><i style="--h:0.17"></i><i style="--h:0.35"></i><i style="--h:0.17"></i><i style="--h:0.19"></i><i style="--h:0.16"></i><i style="--h:0.21"></i><i style="--h:0.11"></i><i style="--h:0.08"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.07"></i><i style="--h:0.51"></i><i style="--h:0.32"></i><i style="--h:0.48"></i><i style="--h:0.27"></i><i style="--h:0.41"></i><i style="--h:0.26"></i><i style="--h:0.1"></i><i style="--h:0.48"></i><i style="--h:0.41"></i><i style="--h:0.12"></i><i style="--h:0.12"></i><i style="--h:0.11"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.84"></i><i style="--h:0.47"></i><i style="--h:0.35"></i><i style="--h:1.0"></i><i style="--h:0.48"></i><i style="--h:0.55"></i><i style="--h:0.82"></i><i style="--h:0.24"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:10</span>
+    <audio preload="metadata" src="audio/p3_good.mp3"></audio>
+  </div>
+  <figcaption>The slot and the no-fee detail come first. The question comes last, and the caller answers it.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">Dr. Rao has an opening this Thursday at 3 PM, and there&#x27;s no fee to reschedule. Would Thursday at 3 work for you?</span></li><li class="ln caller"><span class="ts">0:08</span><span class="who">Caller</span><span class="tx">Yes, Thursday works.</span></li></ol>
+</figure></div>
+  <div class="build"><h3>How to build it</h3><ul><li><span class="layer l-prompt">Prompt</span><span>Write ordering rules into the agent&#x27;s instructions: context first, caveats before options, the question last, one question per turn.</span></li><li><span class="layer l-logic">Logic</span><span>Insert situational details, like fees or eligibility, through conditions so they appear in the right place in the turn.</span></li></ul></div>
+</section>
+<section class="principle" id="memory">
+  <div class="p-head"><span class="eyebrow">Principle 4</span><h2>Go easy on working memory</h2></div>
+  <p class="lede">A listener can&#x27;t scroll back. Speech is heard once, so everything the agent says has to fit in the caller&#x27;s short-term memory. Ask for three things at once and callers answer one, then ask what the others were.</p>
+  <p>Ask for one piece of information at a time. If the caller volunteers extra details, keep them and don&#x27;t ask again. Read out no more than three options. Confirm details lightly by repeating them in the next question, and save full read-back confirmation for actions that are hard to undo.</p>
+  <h3>In practice</h3>
+  <ul class="rules"><li>Ask one question per turn.</li><li>Capture details the caller volunteers early so you don&#x27;t ask for them again.</li><li>List no more than three options, and offer to read out more.</li><li>Confirm implicitly by repeating what you heard in the next question.</li><li>Confirm explicitly only before high-stakes actions: bookings, payments, cancellations.</li></ul>
+  <div class="examples n2">
+<figure class="call poor" id="p4_poor">
+  <header class="call-h"><span class="tag">Before</span><span class="scn">Booking a technician visit</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: Before, Booking a technician visit"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="13.9" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.36"></i><i style="--h:0.56"></i><i style="--h:0.3"></i><i style="--h:0.46"></i><i style="--h:0.52"></i><i style="--h:0.48"></i><i style="--h:0.38"></i><i style="--h:0.18"></i><i style="--h:0.06"></i><i style="--h:0.73"></i><i style="--h:0.95"></i><i style="--h:0.59"></i><i style="--h:0.32"></i><i style="--h:0.5"></i><i style="--h:0.37"></i><i style="--h:0.18"></i><i style="--h:0.06"></i><i style="--h:0.12"></i><i style="--h:0.57"></i><i style="--h:0.37"></i><i style="--h:0.53"></i><i style="--h:0.5"></i><i style="--h:0.23"></i><i style="--h:0.29"></i><i style="--h:0.71"></i><i style="--h:0.49"></i><i style="--h:0.23"></i><i style="--h:0.13"></i><i style="--h:0.06"></i><i style="--h:0.66"></i><i style="--h:0.92"></i><i style="--h:0.85"></i><i style="--h:0.6"></i><i style="--h:0.43"></i><i style="--h:0.45"></i><i style="--h:0.37"></i><i style="--h:0.63"></i><i style="--h:0.34"></i><i style="--h:0.44"></i><i style="--h:0.33"></i><i style="--h:0.12"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.7"></i><i style="--h:1.0"></i><i style="--h:0.83"></i><i style="--h:0.41"></i><i style="--h:0.61"></i><i style="--h:0.85"></i><i style="--h:0.41"></i><i style="--h:0.54"></i><i style="--h:0.83"></i><i style="--h:0.26"></i><i style="--h:0.33"></i><i style="--h:0.99"></i><i style="--h:0.41"></i><i style="--h:0.3"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.53"></i><i style="--h:0.5"></i><i style="--h:0.93"></i><i style="--h:0.3"></i><i style="--h:0.8"></i><i style="--h:0.49"></i><i style="--h:0.34"></i><i style="--h:0.35"></i><i style="--h:0.21"></i><i style="--h:0.06"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:14</span>
+    <audio preload="metadata" src="audio/p4_poor.mp3"></audio>
+  </div>
+  <figcaption>The agent asks for three things at once. The caller gives the address and loses track of the rest.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">To book the technician visit, I&#x27;ll need your full address, your preferred date and time window, and whether an adult will be at home during the visit.</span></li><li class="ln caller"><span class="ts">0:09</span><span class="who">Caller</span><span class="tx">Okay, it&#x27;s 12 Lake View Road, Indiranagar. And, sorry, what else did you need?</span></li></ol>
+</figure>
+<figure class="call good" id="p4_good">
+  <header class="call-h"><span class="tag">After</span><span class="scn">Booking a technician visit</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: After, Booking a technician visit"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="24.5" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.47"></i><i style="--h:0.64"></i><i style="--h:0.4"></i><i style="--h:0.41"></i><i style="--h:0.06"></i><i style="--h:0.56"></i><i style="--h:0.86"></i><i style="--h:0.56"></i><i style="--h:0.51"></i><i style="--h:0.57"></i><i style="--h:0.58"></i><i style="--h:0.18"></i><i style="--h:0.42"></i><i style="--h:0.61"></i><i style="--h:0.53"></i><i style="--h:0.38"></i><i style="--h:0.06"></i><i style="--h:0.67"></i><i style="--h:0.52"></i><i style="--h:0.4"></i><i style="--h:0.22"></i><i style="--h:0.06"></i><i style="--h:0.81"></i><i style="--h:0.75"></i><i style="--h:0.51"></i><i style="--h:0.06"></i><i style="--h:0.18"></i><i style="--h:0.67"></i><i style="--h:0.46"></i><i style="--h:0.06"></i><i style="--h:0.45"></i><i style="--h:0.75"></i><i style="--h:0.37"></i><i style="--h:0.44"></i><i style="--h:0.43"></i><i style="--h:0.34"></i><i style="--h:0.06"></i><i style="--h:0.92"></i><i style="--h:0.39"></i><i style="--h:0.5"></i><i style="--h:0.63"></i><i style="--h:0.63"></i><i style="--h:0.06"></i><i style="--h:0.53"></i><i style="--h:0.2"></i><i style="--h:0.56"></i><i style="--h:0.35"></i><i style="--h:0.63"></i><i style="--h:0.48"></i><i style="--h:0.44"></i><i style="--h:0.39"></i><i style="--h:0.51"></i><i style="--h:0.25"></i><i style="--h:0.75"></i><i style="--h:0.56"></i><i style="--h:0.36"></i><i style="--h:0.49"></i><i style="--h:0.41"></i><i style="--h:0.45"></i><i style="--h:0.55"></i><i style="--h:0.37"></i><i style="--h:0.1"></i><i style="--h:0.06"></i><i style="--h:0.58"></i><i style="--h:0.36"></i><i style="--h:0.36"></i><i style="--h:0.06"></i><i style="--h:1.0"></i><i style="--h:0.78"></i><i style="--h:0.3"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:24</span>
+    <audio preload="metadata" src="audio/p4_good.mp3"></audio>
+  </div>
+  <figcaption>One question at a time. Each answer is repeated in the next question, and a single summary confirms the booking at the end.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">What&#x27;s the address for the visit?</span></li><li class="ln caller"><span class="ts">0:02</span><span class="who">Caller</span><span class="tx">12 Lake View Road, Indiranagar.</span></li><li class="ln agent"><span class="ts">0:05</span><span class="who">Agent</span><span class="tx">Got it, Lake View Road. What day works best for you?</span></li><li class="ln caller"><span class="ts">0:08</span><span class="who">Caller</span><span class="tx">Saturday morning.</span></li><li class="ln agent"><span class="ts">0:09</span><span class="who">Agent</span><span class="tx">Saturday morning. Will someone over eighteen be at home then?</span></li><li class="ln caller"><span class="ts">0:13</span><span class="who">Caller</span><span class="tx">Yes, my husband will be there.</span></li><li class="ln agent"><span class="ts">0:15</span><span class="who">Agent</span><span class="tx">Great. So that&#x27;s a technician visit at 12 Lake View Road, Indiranagar, this Saturday between 9 and 12. Should I confirm it?</span></li><li class="ln caller"><span class="ts">0:23</span><span class="who">Caller</span><span class="tx">Yes, please.</span></li></ol>
+</figure></div>
+  <div class="build"><h3>How to build it</h3><ul><li><span class="layer l-logic">Logic</span><span>Track each required field as a variable, so the agent knows what it already has.</span></li><li><span class="layer l-logic">Logic</span><span>Let the agent fill several fields from one caller sentence when the caller volunteers them.</span></li><li><span class="layer l-prompt">Prompt</span><span>Enforce one question per turn and a final summary before committing.</span></li></ul></div>
+</section>
+<section class="principle" id="repair">
+  <div class="p-head"><span class="eyebrow">Principle 5</span><h2>Repair in steps</h2></div>
+  <p class="lede">Mishearing is normal in conversation, and people fix it all the time. They start with the lightest fix that might work and only escalate if it doesn&#x27;t.</p>
+  <p>A voice agent should do the same. Start with a light check (&quot;Sorry?&quot;), then name what was missed (&quot;I didn&#x27;t get the last name&quot;), then offer a guess to confirm. For names, codes and numbers, switch to spelling or digit-by-digit input. Never repeat the same failed prompt word for word, and never suggest it&#x27;s the caller&#x27;s fault.</p>
+  <h3>In practice</h3>
+  <ul class="rules"><li>First attempt: a light check, like &quot;Sorry?&quot;</li><li>Second attempt: name the specific thing that was missed.</li><li>Third attempt: offer your best guess, or switch to spelling or keypad entry.</li><li>Treat silence as its own problem, with its own prompt.</li><li>Count failures across the whole call, and hand over to a person after about three.</li></ul>
+  <div class="examples n2">
+<figure class="call poor" id="p5_poor">
+  <header class="call-h"><span class="tag">Before</span><span class="scn">Bank account lookup, noisy line</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: Before, Bank account lookup, noisy line"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="11.9" aria-valuenow="0"><i style="--h:0.11"></i><i style="--h:0.13"></i><i style="--h:0.35"></i><i style="--h:0.63"></i><i style="--h:0.92"></i><i style="--h:0.94"></i><i style="--h:0.68"></i><i style="--h:0.55"></i><i style="--h:0.23"></i><i style="--h:0.41"></i><i style="--h:0.12"></i><i style="--h:0.07"></i><i style="--h:0.06"></i><i style="--h:0.08"></i><i style="--h:0.92"></i><i style="--h:0.62"></i><i style="--h:0.57"></i><i style="--h:0.54"></i><i style="--h:0.15"></i><i style="--h:0.09"></i><i style="--h:0.11"></i><i style="--h:0.38"></i><i style="--h:0.82"></i><i style="--h:0.46"></i><i style="--h:0.6"></i><i style="--h:0.4"></i><i style="--h:0.32"></i><i style="--h:0.15"></i><i style="--h:0.13"></i><i style="--h:0.63"></i><i style="--h:0.97"></i><i style="--h:1.0"></i><i style="--h:0.81"></i><i style="--h:0.52"></i><i style="--h:0.35"></i><i style="--h:0.35"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.19"></i><i style="--h:0.99"></i><i style="--h:0.53"></i><i style="--h:0.64"></i><i style="--h:0.51"></i><i style="--h:0.2"></i><i style="--h:0.16"></i><i style="--h:0.16"></i><i style="--h:0.37"></i><i style="--h:0.81"></i><i style="--h:0.48"></i><i style="--h:0.6"></i><i style="--h:0.37"></i><i style="--h:0.28"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.62"></i><i style="--h:0.96"></i><i style="--h:1.0"></i><i style="--h:0.83"></i><i style="--h:0.52"></i><i style="--h:0.35"></i><i style="--h:0.38"></i><i style="--h:0.15"></i><i style="--h:0.15"></i><i style="--h:0.17"></i><i style="--h:0.18"></i><i style="--h:0.88"></i><i style="--h:0.85"></i><i style="--h:0.49"></i><i style="--h:0.12"></i><i style="--h:0.09"></i><i style="--h:0.07"></i></div>
+    <span class="time">0:12</span>
+    <audio preload="metadata" src="audio/p5_poor.mp3"></audio>
+  </div>
+  <figcaption>The agent repeats the identical prompt each time. The caller gives up.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">What&#x27;s the name on the account?</span></li><li class="ln caller"><span class="ts">0:02</span><span class="who">Caller</span><span class="tx">Ramaswamy.</span></li><li class="ln agent"><span class="ts">0:04</span><span class="who">Agent</span><span class="tx">I didn&#x27;t catch that. What&#x27;s the name on the account?</span></li><li class="ln caller"><span class="ts">0:07</span><span class="who">Caller</span><span class="tx">Ramaswamy!</span></li><li class="ln agent"><span class="ts">0:08</span><span class="who">Agent</span><span class="tx">I didn&#x27;t catch that. What&#x27;s the name on the account?</span></li><li class="ln caller"><span class="ts">0:11</span><span class="who">Caller</span><span class="tx">Forget it.</span></li></ol>
+</figure>
+<figure class="call good" id="p5_good">
+  <header class="call-h"><span class="tag">After</span><span class="scn">Bank account lookup, noisy line</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: After, Bank account lookup, noisy line"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="14.5" aria-valuenow="0"><i style="--h:0.11"></i><i style="--h:0.14"></i><i style="--h:0.65"></i><i style="--h:0.77"></i><i style="--h:0.95"></i><i style="--h:0.66"></i><i style="--h:0.42"></i><i style="--h:0.39"></i><i style="--h:0.15"></i><i style="--h:0.07"></i><i style="--h:0.06"></i><i style="--h:0.51"></i><i style="--h:0.88"></i><i style="--h:0.51"></i><i style="--h:0.52"></i><i style="--h:0.1"></i><i style="--h:0.1"></i><i style="--h:0.12"></i><i style="--h:0.93"></i><i style="--h:0.81"></i><i style="--h:0.3"></i><i style="--h:0.16"></i><i style="--h:0.19"></i><i style="--h:0.95"></i><i style="--h:0.4"></i><i style="--h:0.7"></i><i style="--h:0.21"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.96"></i><i style="--h:0.48"></i><i style="--h:0.97"></i><i style="--h:0.57"></i><i style="--h:0.7"></i><i style="--h:0.69"></i><i style="--h:0.34"></i><i style="--h:0.35"></i><i style="--h:0.27"></i><i style="--h:0.16"></i><i style="--h:0.63"></i><i style="--h:0.65"></i><i style="--h:0.71"></i><i style="--h:0.34"></i><i style="--h:0.13"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:1.0"></i><i style="--h:0.49"></i><i style="--h:0.35"></i><i style="--h:0.4"></i><i style="--h:0.35"></i><i style="--h:0.51"></i><i style="--h:0.44"></i><i style="--h:0.33"></i><i style="--h:0.58"></i><i style="--h:0.24"></i><i style="--h:0.14"></i><i style="--h:0.11"></i><i style="--h:0.85"></i><i style="--h:0.4"></i><i style="--h:0.81"></i><i style="--h:0.7"></i><i style="--h:0.43"></i><i style="--h:0.28"></i><i style="--h:0.06"></i><i style="--h:0.62"></i><i style="--h:0.95"></i><i style="--h:0.63"></i><i style="--h:0.36"></i><i style="--h:0.2"></i><i style="--h:0.17"></i><i style="--h:0.17"></i></div>
+    <span class="time">0:14</span>
+    <audio preload="metadata" src="audio/p5_good.mp3"></audio>
+  </div>
+  <figcaption>The agent goes from &quot;Sorry?&quot; to naming the missing part to asking for spelling, then confirms and moves on.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">What&#x27;s the name on the account?</span></li><li class="ln caller"><span class="ts">0:02</span><span class="who">Caller</span><span class="tx">Ramaswamy.</span></li><li class="ln agent"><span class="ts">0:04</span><span class="who">Agent</span><span class="tx">Sorry?</span></li><li class="ln caller"><span class="ts">0:05</span><span class="who">Caller</span><span class="tx">Ramaswamy.</span></li><li class="ln agent"><span class="ts">0:06</span><span class="who">Agent</span><span class="tx">I&#x27;m still not getting the last name. Could you spell it for me?</span></li><li class="ln caller"><span class="ts">0:09</span><span class="who">Caller</span><span class="tx">R-A-M-A-S-W-A-M-Y.</span></li><li class="ln agent"><span class="ts">0:12</span><span class="who">Agent</span><span class="tx">Thanks. Ramaswamy. I&#x27;ve found your account.</span></li></ol>
+</figure></div>
+  <div class="build"><h3>How to build it</h3><ul><li><span class="layer l-logic">Logic</span><span>Keep a repair counter for the whole call. When it reaches three, route to a human agent.</span></li><li><span class="layer l-prompt">Prompt</span><span>Give the agent the repair sequence explicitly, and ban word-for-word repeats.</span></li><li><span class="layer l-channel">Channel</span><span>Add expected names, product terms and codes to speech-recognition hints. Turn off filler-word removal where hesitation matters.</span></li></ul></div>
+</section>
+<section class="principle" id="multimodal">
+  <div class="p-head"><span class="eyebrow">Principle 6</span><h2>Switch channels when voice isn&#x27;t the best tool</h2></div>
+  <p class="lede">Some tasks are hard by voice: comparing more than three options, entering exact codes, giving the caller something to keep, collecting several precise fields, or recovering after repeated failed repairs.</p>
+  <p>When a task is one of these, move it to a better input. Text the caller a secure link, or ask them to use the keypad. Ask before switching, pre-fill anything you already know, and stay on the line while they finish. If you can look a value up from something you already know, like the caller&#x27;s number, do that instead of asking them to spell it.</p>
+  <h3>In practice</h3>
+  <ul class="rules"><li>Switch for long lists, exact codes, several precise fields, or after repeated repair failures.</li><li>Ask before sending a text, and say which number it&#x27;s going to.</li><li>Pre-fill the link with what the caller has already told you.</li><li>Stay on the call and confirm when the caller has finished.</li><li>Use the keypad for numbers, especially sensitive ones. Keypad digits arrive as exact data, so nothing gets misheard.</li></ul>
+  <div class="examples n3">
+<figure class="call poor" id="p6a_poor">
+  <header class="call-h"><span class="tag">Before</span><span class="scn">Hospital pre-registration</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: Before, Hospital pre-registration"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="17.9" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:1.0"></i><i style="--h:0.73"></i><i style="--h:0.41"></i><i style="--h:0.76"></i><i style="--h:0.58"></i><i style="--h:0.34"></i><i style="--h:0.63"></i><i style="--h:0.62"></i><i style="--h:0.22"></i><i style="--h:0.06"></i><i style="--h:0.17"></i><i style="--h:0.32"></i><i style="--h:0.1"></i><i style="--h:0.23"></i><i style="--h:0.44"></i><i style="--h:0.41"></i><i style="--h:0.14"></i><i style="--h:0.44"></i><i style="--h:0.06"></i><i style="--h:0.5"></i><i style="--h:0.3"></i><i style="--h:0.3"></i><i style="--h:0.26"></i><i style="--h:0.12"></i><i style="--h:0.06"></i><i style="--h:0.62"></i><i style="--h:0.86"></i><i style="--h:0.64"></i><i style="--h:0.4"></i><i style="--h:0.7"></i><i style="--h:0.66"></i><i style="--h:0.61"></i><i style="--h:0.83"></i><i style="--h:0.27"></i><i style="--h:0.06"></i><i style="--h:0.58"></i><i style="--h:0.85"></i><i style="--h:0.25"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.37"></i><i style="--h:0.44"></i><i style="--h:0.31"></i><i style="--h:0.3"></i><i style="--h:0.26"></i><i style="--h:0.43"></i><i style="--h:0.28"></i><i style="--h:0.06"></i><i style="--h:0.28"></i><i style="--h:0.82"></i><i style="--h:0.44"></i><i style="--h:0.06"></i><i style="--h:0.86"></i><i style="--h:0.79"></i><i style="--h:0.62"></i><i style="--h:0.62"></i><i style="--h:0.58"></i><i style="--h:0.6"></i><i style="--h:0.53"></i><i style="--h:0.62"></i><i style="--h:0.54"></i><i style="--h:0.56"></i><i style="--h:0.5"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.51"></i><i style="--h:0.34"></i><i style="--h:0.21"></i><i style="--h:0.06"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:18</span>
+    <audio preload="metadata" src="audio/p6a_poor.mp3"></audio>
+  </div>
+  <figcaption>The caller struggles to say a 12-character policy number. After one mistake the agent asks for the whole thing again.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">Please say your twelve-character policy number.</span></li><li class="ln caller"><span class="ts">0:03</span><span class="who">Caller</span><span class="tx">Okay. H, X, 7, 4, B, 9...</span></li><li class="ln agent"><span class="ts">0:07</span><span class="who">Agent</span><span class="tx">I heard H, X, 7, 4, D, 9. Is that right?</span></li><li class="ln caller"><span class="ts">0:10</span><span class="who">Caller</span><span class="tx">No. B. B as in boy.</span></li><li class="ln agent"><span class="ts">0:13</span><span class="who">Agent</span><span class="tx">Okay. Please say your twelve-character policy number from the beginning.</span></li><li class="ln caller"><span class="ts">0:17</span><span class="who">Caller</span><span class="tx">Seriously?</span></li></ol>
+</figure>
+<figure class="call good" id="p6a_good">
+  <header class="call-h"><span class="tag">After</span><span class="scn">Hospital pre-registration</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: After, Hospital pre-registration"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="21.1" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.64"></i><i style="--h:1.0"></i><i style="--h:0.6"></i><i style="--h:0.49"></i><i style="--h:0.43"></i><i style="--h:0.57"></i><i style="--h:0.63"></i><i style="--h:0.81"></i><i style="--h:0.5"></i><i style="--h:0.45"></i><i style="--h:0.41"></i><i style="--h:0.28"></i><i style="--h:0.06"></i><i style="--h:0.44"></i><i style="--h:0.38"></i><i style="--h:0.75"></i><i style="--h:0.61"></i><i style="--h:0.39"></i><i style="--h:0.15"></i><i style="--h:0.06"></i><i style="--h:0.77"></i><i style="--h:0.36"></i><i style="--h:0.49"></i><i style="--h:0.51"></i><i style="--h:0.39"></i><i style="--h:0.42"></i><i style="--h:0.27"></i><i style="--h:0.06"></i><i style="--h:0.3"></i><i style="--h:0.46"></i><i style="--h:0.1"></i><i style="--h:0.06"></i><i style="--h:0.53"></i><i style="--h:0.8"></i><i style="--h:0.59"></i><i style="--h:0.76"></i><i style="--h:0.34"></i><i style="--h:0.55"></i><i style="--h:0.55"></i><i style="--h:0.45"></i><i style="--h:0.45"></i><i style="--h:0.29"></i><i style="--h:0.45"></i><i style="--h:0.12"></i><i style="--h:0.06"></i><i style="--h:0.6"></i><i style="--h:0.59"></i><i style="--h:0.76"></i><i style="--h:0.52"></i><i style="--h:0.4"></i><i style="--h:0.35"></i><i style="--h:0.2"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.27"></i><i style="--h:0.38"></i><i style="--h:0.35"></i><i style="--h:0.09"></i><i style="--h:0.06"></i><i style="--h:0.6"></i><i style="--h:0.64"></i><i style="--h:0.5"></i><i style="--h:0.24"></i><i style="--h:0.81"></i><i style="--h:0.5"></i><i style="--h:0.53"></i><i style="--h:0.15"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:21</span>
+    <audio preload="metadata" src="audio/p6a_good.mp3"></audio>
+  </div>
+  <figcaption>The agent offers a secure text link for the number and card photo, waits for consent, and stays on the line.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">I&#x27;ll need your policy number and a photo of your insurance card. That&#x27;s easier on your phone. Can I text you a secure link to fill it in?</span></li><li class="ln caller"><span class="ts">0:09</span><span class="who">Caller</span><span class="tx">Sure.</span></li><li class="ln agent"><span class="ts">0:10</span><span class="who">Agent</span><span class="tx">Sent to the number ending in 4321. I&#x27;ll stay on the line while you fill it in.</span></li><li class="ln pause"><span class="ts"></span><span class="who">Silence</span><span class="tx">2 seconds of silence</span></li><li class="ln caller"><span class="ts">0:17</span><span class="who">Caller</span><span class="tx">Okay, done.</span></li><li class="ln agent"><span class="ts">0:19</span><span class="who">Agent</span><span class="tx">Got it, thanks. You&#x27;re all set for Tuesday.</span></li></ol>
+</figure>
+<figure class="call keypad" id="p6b_keypad">
+  <header class="call-h"><span class="tag">Keypad</span><span class="scn">Order number by keypad</span></header>
+  <div class="player">
+    <button class="play" type="button" aria-label="Play: Keypad, Order number by keypad"><span class="ico" aria-hidden="true"></span></button>
+    <div class="wave" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="14.2" aria-valuenow="0"><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.66"></i><i style="--h:0.64"></i><i style="--h:0.78"></i><i style="--h:0.14"></i><i style="--h:0.74"></i><i style="--h:0.67"></i><i style="--h:0.68"></i><i style="--h:0.55"></i><i style="--h:0.69"></i><i style="--h:0.79"></i><i style="--h:0.68"></i><i style="--h:0.35"></i><i style="--h:0.33"></i><i style="--h:0.1"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.34"></i><i style="--h:0.49"></i><i style="--h:0.2"></i><i style="--h:0.56"></i><i style="--h:0.33"></i><i style="--h:0.49"></i><i style="--h:0.06"></i><i style="--h:0.6"></i><i style="--h:0.06"></i><i style="--h:0.41"></i><i style="--h:0.43"></i><i style="--h:0.06"></i><i style="--h:0.6"></i><i style="--h:0.06"></i><i style="--h:0.34"></i><i style="--h:0.49"></i><i style="--h:0.06"></i><i style="--h:0.6"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.74"></i><i style="--h:0.78"></i><i style="--h:0.06"></i><i style="--h:0.51"></i><i style="--h:0.69"></i><i style="--h:1.0"></i><i style="--h:0.82"></i><i style="--h:0.84"></i><i style="--h:0.4"></i><i style="--h:0.74"></i><i style="--h:0.49"></i><i style="--h:0.13"></i><i style="--h:0.91"></i><i style="--h:0.56"></i><i style="--h:0.61"></i><i style="--h:0.37"></i><i style="--h:0.32"></i><i style="--h:0.12"></i><i style="--h:0.06"></i><i style="--h:0.06"></i><i style="--h:0.55"></i><i style="--h:0.58"></i><i style="--h:0.71"></i><i style="--h:0.51"></i><i style="--h:0.41"></i><i style="--h:0.58"></i><i style="--h:0.69"></i><i style="--h:0.84"></i><i style="--h:0.63"></i><i style="--h:0.73"></i><i style="--h:0.21"></i><i style="--h:0.06"></i><i style="--h:0.06"></i></div>
+    <span class="time">0:14</span>
+    <audio preload="metadata" src="audio/p6b_keypad.mp3"></audio>
+  </div>
+  <figcaption>The caller types eight digits. The agent reads back only the last four and gives the status.</figcaption>
+  <ol class="script"><li class="ln agent"><span class="ts">0:00</span><span class="who">Agent</span><span class="tx">Please type your eight-digit order number on your keypad.</span></li><li class="ln keys"><span class="ts"></span><span class="who">Keypad</span><span class="tx">Caller types 8 digits on the keypad</span></li><li class="ln agent"><span class="ts">0:08</span><span class="who">Agent</span><span class="tx">Thanks. That&#x27;s the order ending in 5027. It shipped yesterday and should arrive on Monday.</span></li></ol>
+</figure></div>
+  <div class="build"><h3>How to build it</h3><ul><li><span class="layer l-logic">Logic</span><span>Store the caller&#x27;s consent as a variable, and only send the text once it&#x27;s set.</span></li><li><span class="layer l-logic">Logic</span><span>Route keypad input into the same capture logic as speech, since it arrives as plain text.</span></li><li><span class="layer l-prompt">Prompt</span><span>Tell the agent when to offer a channel switch and how to ask for consent.</span></li></ul></div>
+</section>
+
+  <section class="block">
+    <div class="col" style="display:grid;gap:1rem">
+      <span class="eyebrow">Putting it into practice</span>
+      <h2>Test with your ears, not your eyes</h2>
+      <p>A script that reads well in a text preview can sound wrong on a call. Design the channel settings alongside the instructions, and test the way callers will actually experience the agent.</p>
+      <ul>
+        <li>Listen to every flow as audio, not just as text.</li>
+        <li>Test on noisy lines, with different accents, and with people who haven't seen the script.</li>
+        <li>Turn each before/after pair into a regression scenario so fixes don't quietly break later.</li>
+        <li>Keep the split clear: turn rules in the prompt, sequence and counters in logic, sound and timing in channel settings.</li>
+      </ul>
+      <p>Callers bring the same expectations to every call that they bring to any conversation. When an agent meets those expectations, the call simply feels natural.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>All recordings on this page are synthetic, made with text-to-speech voices for illustration. Caller audio is band-limited to sound like a phone line.</p>
+    <p>Further reading in conversation analysis:</p>
+    <ul>
+      <li>Sacks, Schegloff &amp; Jefferson (1974). A simplest systematics for the organization of turn-taking for conversation. <i>Language</i>, 50(4).</li>
+      <li>Schegloff, Jefferson &amp; Sacks (1977). The preference for self-correction in the organization of repair in conversation. <i>Language</i>, 53(2).</li>
+      <li>Schegloff (2007). <i>Sequence Organization in Interaction</i>. Cambridge University Press.</li>
+      <li>Stivers et al. (2009). Universals and cultural variation in turn-taking in conversation. <i>PNAS</i>, 106(26).</li>
+    </ul>
+    <p>Adapted from <a href="https://www.salesforce.com/blog/voice-design-principles/">Six Principles of Voice Design</a> by Philipp Hänggi.</p>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const calls = [...document.querySelectorAll('.call')];
+  let current = null;
+  const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  calls.forEach(call => {
+    const audio = call.querySelector('audio'), btn = call.querySelector('.play'), wave = call.querySelector('.wave');
+    const bars = [...wave.children], time = call.querySelector('.time');
+    const lines = [...call.querySelectorAll('.ln')];
+    const starts = lines.map(li => { const t = li.querySelector('.ts').textContent; if (!t) return null; const [m, s] = t.split(':'); return +m * 60 + +s; });
+    const total = () => audio.duration || +wave.getAttribute('aria-valuemax');
+    const paint = () => {
+      const f = audio.currentTime / total();
+      bars.forEach((b, i) => b.classList.toggle('done', i / bars.length < f));
+      time.textContent = audio.paused && audio.currentTime === 0 ? fmt(total()) : fmt(audio.currentTime);
+      wave.setAttribute('aria-valuenow', audio.currentTime.toFixed(1));
+      let active = -1;
+      starts.forEach((s, i) => { if (s !== null && audio.currentTime >= s - 0.2) active = i; });
+      lines.forEach((li, i) => li.classList.toggle('now', !audio.paused && i === active));
+    };
+    btn.addEventListener('click', () => {
+      if (audio.paused) {
+        if (current && current !== audio) current.pause();
+        current = audio; audio.play().catch(() => {});
+      } else audio.pause();
+    });
+    audio.addEventListener('play', () => { btn.classList.add('on'); paint(); });
+    audio.addEventListener('pause', () => { btn.classList.remove('on'); paint(); });
+    audio.addEventListener('ended', () => { audio.currentTime = 0; paint(); });
+    audio.addEventListener('timeupdate', paint);
+    const seek = x => { const r = wave.getBoundingClientRect(); audio.currentTime = Math.min(1, Math.max(0, (x - r.left) / r.width)) * total(); paint(); };
+    wave.addEventListener('click', ev => seek(ev.clientX));
+    wave.addEventListener('keydown', ev => {
+      if (ev.key === 'ArrowRight') { audio.currentTime = Math.min(total(), audio.currentTime + 2); paint(); ev.preventDefault(); }
+      if (ev.key === 'ArrowLeft') { audio.currentTime = Math.max(0, audio.currentTime - 2); paint(); ev.preventDefault(); }
+      if (ev.key === ' ' || ev.key === 'Enter') { btn.click(); ev.preventDefault(); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
